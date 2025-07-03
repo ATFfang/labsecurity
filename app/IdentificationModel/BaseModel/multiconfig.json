@@ -1,0 +1,37 @@
+{
+    "model_type": "single",
+    "resize": {
+        "enabled": true,
+        "size": [
+            640,
+            480
+        ]
+    },
+    "preprocess": {
+        "ifmask": false,
+        "ifimmediatelyalert": false,
+        "duration": 0,
+        "camera_settings": {
+            "cam01": {
+                "mask": [
+                ]
+            },
+            "cam02": {
+                "mask": [
+                ]
+            }
+        }
+    },
+    "pipeline": [
+        {
+            "name": "yolo11s",
+            "type": "pt",
+            "weight_path": "E:/Project/Commercial/保卫处项目/Model/app/IdentificationModel/Model/yolo11s.pt"
+        },
+        {
+            "name": "mobilenet_v2",
+            "type": "pth",
+            "weight_path": "E:/Project/Commercial/保卫处项目/Model/app/IdentificationModel/Model/coat_classifier_final.pth"
+        }
+    ]
+}

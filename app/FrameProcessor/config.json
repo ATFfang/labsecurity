@@ -1,0 +1,63 @@
+[
+    {
+      "camera_id": 1,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 1
+    },
+    {
+      "camera_id": 2,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 3,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 4,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 5,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 6,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 7,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 8,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 9,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    },
+    {
+      "camera_id": 10,
+      "stream_url": "rtsp://192.168.31.73:8554/stream",
+      "frame_interval": 5,
+      "room_id": 2
+    }
+  ]
+  

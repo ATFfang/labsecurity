@@ -1,0 +1,10 @@
+minio==7.2.15
+numpy==2.3.1
+opencv_contrib_python==4.11.0.86
+opencv_python==4.11.0.86
+Pillow==11.3.0
+psycopg2==2.9.10
+torch==2.5.1
+torch==2.6.0
+torchvision==0.20.1
+ultralytics==8.3.115
