@@ -1,2 +1,4 @@
 app/MessageQueues/photo/*
 !app/MessageQueues/photo/.gitkeep
+
+./logs/*
