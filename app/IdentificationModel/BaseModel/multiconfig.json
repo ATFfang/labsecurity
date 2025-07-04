@@ -1,23 +1,45 @@
 {
-    "model_type": "single",
-    "resize": {
-        "enabled": true,
-        "size": [
-            640,
-            480
-        ]
-    },
+    "name": "nightsingledetecter",
     "preprocess": {
         "ifmask": false,
         "ifimmediatelyalert": false,
+        "ifresize": true,
+        "size":[
+            640,
+            480
+        ],
         "duration": 0,
         "camera_settings": {
             "cam01": {
                 "mask": [
+                    [
+                        10,
+                        20,
+                        100,
+                        200
+                    ],
+                    [
+                        150,
+                        50,
+                        300,
+                        180
+                    ]
                 ]
             },
             "cam02": {
                 "mask": [
+                    [
+                        10,
+                        20,
+                        100,
+                        200
+                    ],
+                    [
+                        150,
+                        50,
+                        300,
+                        180
+                    ]
                 ]
             }
         }

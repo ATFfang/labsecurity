@@ -77,5 +77,5 @@ def launch_and_destroy(window, mode):
 
 
 if __name__ == '__main__':
-    start_with_mode('stream')
+    start_with_mode('stream',concurrent = True)
     # launch_gui()

@@ -69,6 +69,9 @@ class IdentificationModel(BaseModel):
     def _loadmodel(self):
         predict = ModelLoader.loader(self.name, self.pipeline, self.device)
         return predict
+    
+    def __str__(self):
+        return self.name
 
 
 

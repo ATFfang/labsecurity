@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>摄像头选择与RTSP流程</title>
+<style>
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    display: flex; height: 100vh; background: #f5f5f7; color: #000;
+  }
+  #left, #right {
+    flex: 1; padding: 20px; overflow-y: auto; background: white; border-right: 1px solid #ddd;
+  }
+  #right {
+    border-right: none;
+    display: flex; flex-direction: column;
+  }
+  h2 { font-weight: 600; font-size: 22px; margin-bottom: 12px; }
+  table {
+    width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden;
+  }
+  th, td {
+    padding: 12px; border-bottom: 1px solid #eee; text-align: left;
+  }
+  tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  tr:hover {
+    background-color: #f0f8ff;
+  }
+  tr.selected {
+    background-color: #d0e8ff;
+  }
+  label {
+    display: inline-block; margin-right: 10px; margin-bottom: 6px;
+  }
+  input {
+    padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc;
+    font-size: 14px; width: 180px;
+  }
+  button {
+    padding: 12px 20px; font-size: 16px; background-color: #007aff; color: white;
+    border: none; border-radius: 12px; margin-top: 10px; cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  button:disabled {
+    background-color: #a0c4ff;
+    cursor: not-allowed;
+  }
+  button:hover:not(:disabled) {
+    background-color: #005ecb;
+  }
+  #selection-list > div {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    user-select: none;
+  }
+  #login-section {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  #login-status {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <div id="login-section">
+    <h2>登录信息</h2>
+    <label>用户名：<input type="text" id="username" value="loadmin"></label><br/>
+    <label>密码：<input type="password" id="password" value="admin_123"></label><br/>
+    <label>服务IP：<input type="text" id="serviceIp" value="192.169.15.89"></label><br/>
+    <button id="btn-login">登录</button>
+    <button id="btn-logout" disabled>退出登录</button>
+    <div id="login-status">未登录</div>
+  </div>
+
+  <h2>摄像头列表</h2>
+  <button id="btn-query" disabled>刷新摄像头列表</button>
+  <table>
+    <thead>
+      <tr><th>摄像头ID</th><th>名称</th><th>状态</th></tr>
+    </thead>
+    <tbody id="camera-body"></tbody>
+  </table>
+</div>
+
+<div id="right">
+  <h2>已选摄像头</h2>
+  <div id="selection-list"><p style="color:gray;">请从左侧列表选择摄像头</p></div>
+  <label for="interval">帧间隔（秒）:</label>
+  <select id="interval">
+    <option value="5">5</option>
+    <option value="15">15</option>
+    <option value="30">30</option>
+    <option value="60" selected>60</option>
+    <option value="120">120</option>
+  </select>
+  <button id="download-btn" disabled>确定并下载JSON</button>
+</div>
+
+<script src="rtsp.js"></script> <!-- 你的RTSP类路径 -->
+
+<script>
+  const rtsp = new RTSP();
+
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const serviceIpInput = document.getElementById('serviceIp');
+  const btnLogin = document.getElementById('btn-login');
+  const btnLogout = document.getElementById('btn-logout');
+  const loginStatus = document.getElementById('login-status');
+  const btnQuery = document.getElementById('btn-query');
+
+  const cameraBody = document.getElementById('camera-body');
+  const selectionList = document.getElementById('selection-list');
+  const intervalSelect = document.getElementById('interval');
+  const downloadBtn = document.getElementById('download-btn');
+
+  const selectedCameras = new Map();
+
+  // 登录状态
+  let loggedIn = false;
+  let keepAliveTimer = null;
+
+  // 登录
+  btnLogin.onclick = async () => {
+    const user = usernameInput.value.trim();
+    const pass = passwordInput.value.trim();
+    const ip = serviceIpInput.value.trim();
+
+    if (!user || !pass || !ip) {
+      alert('请输入用户名、密码和服务IP');
+      return;
+    }
+
+    try {
+      loginStatus.textContent = '登录中...';
+      btnLogin.disabled = true;
+
+      // 传入登录参数到rtsp对象（根据你的rtsp.js实际属性）
+      rtsp.username = user;
+      rtsp.password = pass;
+      rtsp.ip = ip;
+
+      // 登录函数，假设返回 Promise
+      await rtsp.loginI();
+
+      loginStatus.textContent = '登录成功';
+      loggedIn = true;
+
+      btnLogin.disabled = true;
+      btnLogout.disabled = false;
+      btnQuery.disabled = false;
+
+      startKeepAlive();
+      await registerChannels(100);
+
+      await loadCameraList();
+
+    } catch(e) {
+      loginStatus.textContent = '登录失败: ' + e.message;
+      loggedIn = false;
+      btnLogin.disabled = false;
+      btnLogout.disabled = true;
+      btnQuery.disabled = true;
+    }
+  };
+
+  // 退出登录
+  btnLogout.onclick = async () => {
+    try {
+      if (keepAliveTimer) {
+        clearInterval(keepAliveTimer);
+        keepAliveTimer = null;
+      }
+      await rtsp.logoutI ? rtsp.logoutI() : Promise.resolve(); // 如果有登出接口
+    } catch {}
+
+    loginStatus.textContent = '已退出登录';
+    loggedIn = false;
+    btnLogin.disabled = false;
+    btnLogout.disabled = true;
+    btnQuery.disabled = true;
+
+    cameraBody.innerHTML = '';
+    selectionList.innerHTML = '<p style="color:gray;">请先登录</p>';
+    downloadBtn.disabled = true;
+    selectedCameras.clear();
+  };
+
+  // 保活（每30秒调用一次）
+  function startKeepAlive() {
+    if (keepAliveTimer) clearInterval(keepAliveTimer);
+    keepAliveTimer = setInterval(() => {
+      if (rtsp.keepAliveI) {
+        rtsp.keepAliveI().catch(e => {
+          console.warn('保活失败:', e);
+        });
+      }
+    }, 30000);
+  }
+
+  // 注册播放通道，默认数量
+  async function registerChannels(numChannels = 100) {
+    if (!rtsp.buildChannelsI) return;
+    try {
+      await rtsp.buildChannelsI(numChannels);
+      console.log(`成功注册${numChannels}播放通道`);
+    } catch(e) {
+      console.warn('注册播放通道失败:', e);
+    }
+  }
+
+  // 加载摄像头列表
+  async function loadCameraList() {
+    btnQuery.disabled = true;
+    try {
+      const res = await fetch('http://localhost:8000/cameras');
+      if(!res.ok) throw new Error('网络错误');
+      const data = await res.json();
+      renderCameraList(data);
+    } catch(e) {
+      alert('获取摄像头列表失败: ' + e.message);
+    } finally {
+      btnQuery.disabled = false;
+    }
+  }
+
+  // 渲染摄像头表格
+  function renderCameraList(cameras) {
+    cameraBody.innerHTML = '';
+    cameras.forEach(cam => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${cam.id}</td>
+        <td>${cam.camera_name}</td>
+        <td>${cam.camera_status == 1 ? '在线' : (cam.camera_status == 2 ? '离线' : '不可用')}</td>
+      `;
+      tr.addEventListener('click', () => {
+        if(selectedCameras.has(cam.id)){
+          selectedCameras.delete(cam.id);
+          tr.classList.remove('selected');
+        } else {
+          selectedCameras.set(cam.id, cam);
+          tr.classList.add('selected');
+        }
+        updateSelectionList();
+      });
+      cameraBody.appendChild(tr);
+    });
+  }
+
+  // 更新右侧已选摄像头
+  function updateSelectionList() {
+    selectionList.innerHTML = '';
+    if(selectedCameras.size === 0){
+      selectionList.innerHTML = '<p style="color:gray;">请从左侧列表选择摄像头</p>';
+      downloadBtn.disabled = true;
+      return;
+    }
+    downloadBtn.disabled = false;
+    selectedCameras.forEach(cam => {
+      const div = document.createElement('div');
+      div.textContent = `${cam.camera_name} (ID: ${cam.id})`;
+      selectionList.appendChild(div);
+    });
+  }
+
+  // 点击确定，获取RTSP流，生成下载JSON
+  downloadBtn.onclick = async () => {
+    if(selectedCameras.size === 0){
+      alert('请先选择摄像头');
+      return;
+    }
+    downloadBtn.disabled = true;
+
+    const interval = parseInt(intervalSelect.value, 10);
+    const cams = Array.from(selectedCameras.values());
+
+    try {
+      const results = [];
+
+      for(let i=0; i < cams.length; i++){
+        const cam = cams[i];
+        try {
+          const url = await rtsp.getRTSPURL(cam.id);
+          results.push({
+            camera_id: cam.id,
+            stream_url: url,
+            frame_interval: interval,
+            room_id: i + 1
+          });
+        } catch(e) {
+          console.error(`摄像头${cam.camera_name}获取RTSP失败`, e);
+          alert(`摄像头${cam.camera_name}获取RTSP失败: ${e.message}`);
+          // 根据需求，这里选择跳过或终止，这里示例跳过
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(results, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'camera_config.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+    } catch(e) {
+      alert('获取RTSP失败: ' + e.message);
+    } finally {
+      downloadBtn.disabled = false;
+    }
+  };
+
+  // 初始禁用相关按钮
+  btnQuery.disabled = true;
+  downloadBtn.disabled = true;
+  selectionList.innerHTML = '<p style="color:gray;">请先登录</p>';
+</script>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>RTSP实况</title>
+    <link rel="stylesheet" type="text/css" href="./rtsp.css" />
+</head>
+<body>
+    <div class="uvn-common">
+        <div class="unv-head">RTSP DEMO</div>
+        <div class='unv-content'>
+            <span class="unv-bold">[基本参数]</span>
+            <label><span>用户名：</span><input type="text" id="unvName" value="loadmin" /></label>
+            <label><span>密码：</span><input type="password" id="unvPassword" value="admin_123" /></label>
+            <label><span>服务IP：</span><input type="text" id="unvServiceIp" value="192.169.15.89" /></label>
+        </div>
+        <div class='unv-content'>
+            <span class="unv-bold">[使用流程]</span>
+            <button id="unvLoginIn">登录</button>
+            <button id="unvLoginOut">退出登录</button>
+        </div>
+        <div class="unv-content">
+            <span class="unv-bold">[登录状态]</span>
+            <span id="unvLoginState"></span>
+        </div>
+    </div>
+    <div class="unv-content"> 
+        <div class="unv-title"><span>1</span>查询相机列表</div>
+        <div>
+            <div>
+                <div>
+                    <label><span required>组织编码：</span><input type="text" id="unvOrgCode"
+                            value="iccsid" /></label>
+                    <label><span required>资源类型：</span><input type="text" id="unvResourcesType"
+                            value="1001" /></label>
+                    <label><span required>分页查询首条索引：</span><input type="text" id="unvPageFirst"
+                            value="0" /></label>
+                    <label><span required>每页的最大条目数：</span><input type="text" id="unvPageNumber"
+                            value="5" /></label>
+                </div>
+            </div>
+            <div>
+                <button id="unvQueryTrack">查询</button>
+                <span class='unv-look'>查看</span>
+            </div>
+            <div class='unv-table' id="unvTableOne"></div>
+            <div class='unv-details' id="unvTextOne"></div>
+        </div>
+
+        <div class="unv-title"><span>2</span>用户保活(间隔30秒调用一次保活接口)</div>
+        <div>           
+            <div>
+                <button id="unvKeepAlive">开启保活</button>
+                <span class='unv-look'>查看</span>                
+            </div> 
+            <div class="unv-content">
+                <span id="unvKeepAliveTimes" style="color:  #1890ff; font-size: 20px;"></span>
+            </div>
+            <div class='unv-details' id="unvTextOneKeep"></div>
+        </div>
+        
+        <div class="unv-title"><span>3</span>注册播放通道</div>
+        <div>
+            <div>
+                <label><span required>通道数量：</span><input type="text" id="unvChannelNum" value="25" /></label>
+            </div>
+            <div>
+                <button id="unvBuildChannel">注册播放通道</button>
+                <span class='unv-look'>查看</span>
+            </div>
+            <div class="unv-content">
+                <span id="unvTextBuildChannel" style="color: #1890ff; font-size: 20px;"></span>
+            </div> 
+            <div class='unv-table' id="unvTableTwo"></div>
+            <div class='unv-details' id="unvTextTwo"></div>
+        </div>
+        
+        <div class="unv-title"><span>4</span>获取RTSP URL</div>
+        <div>
+            <div>
+                <label><span required>摄像机编码: </span><input type="text" id="unvCameraCode" /></label>
+                <label><span required>码流类型 : </span><input type="text" id="unvStreamType" value="1" /></label><span>0-不指定，1-指定主流，2-指定辅流，3-指定三流</span>
+            </div>
+            <div>
+                <button id="unvGetRTSPURL">获取RTSP URL</button>
+                <span class='unv-look'>查看</span>
+            </div>
+            <div class="unv-content">
+                <span id="unvTextRTSPURL" style="color: #1890ff; font-size: 20px;"></span>
+            </div> 
+            <div class='unv-table' id="unvTableThree"></div>
+            <div class='unv-details' id="unvTextThree"></div>
+        </div>
+
+    </div>
+    <script type="text/javascript" src="./common/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="./common/md5.js"></script>
+    <script type="text/javascript" src="./common/common.js"></script>
+    <script type="text/javascript" src="./rtsp.js"></script>
+</body>
+</html>

@@ -18,6 +18,7 @@ from MessageQueues import GlobalMessageQueue, PhotoMessage
 from FrameProcessor import global_mq
 from .BaseModel import IdentificationModel
 from DataBase import DataSaver
+from Log import logger
 
 
 class PhotoConsumer(threading.Thread):
@@ -37,6 +38,8 @@ class PhotoConsumer(threading.Thread):
 
         # 初始化模型列表
         self.modellist = [IdentificationModel(config) for config in config_list]
+        for model in self.modellist:
+            logger.info(model)
 
     def stop(self):
         """停止线程并关闭线程池"""
@@ -79,14 +82,19 @@ class PhotoConsumer(threading.Thread):
 
         except Exception as e:
             print(f"[Error] 消费消息失败: {e}")
+            logger.exception("[Error] 消费消息失败")
 
 
 # 定义一个函数，用于启动照片消费者
 def start_photo_consumer_concurrent():
     with open(r"E:\Project\Commercial\保卫处项目\Model\app\IdentificationModel\BaseModel\singleconfig.json", "r", encoding="utf-8") as f:
         config = json.load(f)
-    config_list = [config]
-    consumer = PhotoConsumer(config_list, max_workers=4)  # 可调整线程数
+    with open(r"E:\Project\Commercial\保卫处项目\Model\app\IdentificationModel\BaseModel\multiconfig.json", "r", encoding="utf-8") as f:
+        config2 = json.load(f)
+        
+    config_list = [config, config2]
+    # config_list = [config]
+    consumer = PhotoConsumer(config_list, max_workers=3)  # 可调整线程数
     consumer.start()
     return consumer
 

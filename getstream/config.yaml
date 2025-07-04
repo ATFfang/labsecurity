@@ -1,0 +1,8 @@
+server_ip: "192.168.1.100"
+username: "admin"
+password: "admin123"
+channel_num: 5
+stream_type: 1
+camera_ids:
+  - "CAM001"
+  - "CAM002"
