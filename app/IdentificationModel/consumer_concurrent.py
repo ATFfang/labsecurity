@@ -92,13 +92,14 @@ def start_photo_consumer_concurrent():
 
 
 if __name__ == "__main__":
-    with open(r"E:\Project\Commercial\保卫处项目\Model\app\IdentificationModel\BaseModel\singleconfig.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
-    config_list = [config]
+    # with open(r"E:\Project\Commercial\保卫处项目\Model\app\IdentificationModel\BaseModel\singleconfig.json", "r", encoding="utf-8") as f:
+    #     config = json.load(f)
+    # config_list = [config]
 
-    consumer = PhotoConsumer(config_list, max_workers=4)
-    consumer.start()
+    # consumer = PhotoConsumer(config_list, max_workers=4)
+    # consumer.start()
 
-    # 防止主线程退出
-    while True:
-        time.sleep(10)
+    # # 防止主线程退出
+    # while True:
+    #     time.sleep(10)
+    pass
